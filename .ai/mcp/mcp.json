@@ -1,0 +1,11 @@
+{
+  "mcpServers": {
+    "laravel-boost": {
+      "command": "/usr/bin/php",
+      "args": [
+        "/home/kevin/Projects/laravel/velo-revamp/artisan",
+        "boost:mcp"
+      ]
+    }
+  }
+}
