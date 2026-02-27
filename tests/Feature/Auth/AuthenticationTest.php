@@ -1,6 +1,6 @@
 <?php
 
-use App\Models\User;
+use App\Models\Superuser;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
 uses(RefreshDatabase::class);
@@ -18,7 +18,7 @@ test('users can register', function () {
 });
 
 test('users can login', function () {
-    $user = User::factory()->create();
+    $user = Superuser::factory()->create();
     $response = $this->post('/api/login', [
         'email' => $user->email,
         'password' => 'password',
@@ -29,7 +29,7 @@ test('users can login', function () {
 });
 
 test('users cannot login with invalid password', function () {
-    $user = User::factory()->create();
+    $user = Superuser::factory()->create();
 
     $this->post('/api/login', [
         'email' => $user->email,
@@ -40,7 +40,7 @@ test('users cannot login with invalid password', function () {
 });
 
 test('users can logout', function () {
-    $user = User::factory()->create();
+    $user = Superuser::factory()->create();
 
     $response = $this->actingAs($user, 'web')->post('/api/logout');
 
@@ -49,7 +49,7 @@ test('users can logout', function () {
 });
 
 test('can get authenticated user', function () {
-    $user = User::factory()->create();
+    $user = Superuser::factory()->create();
 
     $response = $this->actingAs($user, 'web')->getJson('/api/user');
 

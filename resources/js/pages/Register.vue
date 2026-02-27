@@ -34,7 +34,7 @@ const handleSubmit = async () => {
       password_confirmation: password_confirmation.value,
     });
     await fetchUser();
-    router.push("/_/");
+    router.push('/');
   } catch (err) {
     error.value = err.response?.data?.message || "An error occurred during registration.";
     console.error("Register error", err);
