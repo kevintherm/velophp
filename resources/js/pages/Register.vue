@@ -1,11 +1,13 @@
 <script setup>
-import Button from "@/components/ui/Button.vue";
-import Input from "@/components/ui/Input.vue";
-import Label from "@/components/ui/Label.vue";
-import Card from "@/components/ui/Card.vue";
-import CardHeader from "@/components/ui/CardHeader.vue";
-import CardTitle from "@/components/ui/CardTitle.vue";
-import CardContent from "@/components/ui/CardContent.vue";
+import {
+  Button,
+  Input,
+  Label,
+  Card,
+  CardHeader,
+  CardTitle,
+  CardContent,
+} from "@/components/ui";
 import { ref } from "vue";
 import { useRouter } from "vue-router";
 import axios from "axios";
