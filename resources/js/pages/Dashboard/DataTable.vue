@@ -54,7 +54,7 @@ defineEmits(['toggle-all', 'toggle-record', 'prev-page', 'next-page'])
             <Table>
                 <TableHeader>
                     <TableRow>
-                        <TableHead class="w-[50px]">
+                        <TableHead class="w-12.5">
                             <Checkbox
                                 :model-value="selectedRecords.length === paginatedRecords.length && paginatedRecords.length > 0"
                                 @update:model-value="(val) => $emit('toggle-all', val)"
@@ -65,7 +65,7 @@ defineEmits(['toggle-all', 'toggle-record', 'prev-page', 'next-page'])
                         <TableHead>Email</TableHead>
                         <TableHead>Role</TableHead>
                         <TableHead>Created At</TableHead>
-                        <TableHead class="text-right">Actions</TableHead>
+                        <TableHead>Updated At</TableHead>
                     </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -93,19 +93,7 @@ defineEmits(['toggle-all', 'toggle-record', 'prev-page', 'next-page'])
                         </span>
                         </TableCell>
                         <TableCell class="text-muted-foreground">{{ record.created_at }}</TableCell>
-                        <TableCell class="text-right">
-                            <div class="flex justify-end gap-2">
-                                <Button variant="ghost" size="icon" class="h-8 w-8">
-                                    <Edit class="h-4 w-4"/>
-                                </Button>
-                                <Button variant="ghost" size="icon" class="h-8 w-8 text-destructive">
-                                    <Trash2 class="h-4 w-4"/>
-                                </Button>
-                                <Button variant="ghost" size="icon" class="h-8 w-8">
-                                    <MoreVertical class="h-4 w-4"/>
-                                </Button>
-                            </div>
-                        </TableCell>
+                        <TableCell class="text-muted-foreground">{{ record.created_at }}</TableCell>
                     </TableRow>
                     <TableRow v-if="paginatedRecords.length === 0">
                         <TableCell colspan="7" class="h-24 text-center text-muted-foreground">
