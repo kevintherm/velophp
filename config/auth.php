@@ -62,7 +62,7 @@ return [
     'providers' => [
         'users' => [
             'driver' => 'eloquent',
-            'model' => env('AUTH_MODEL', App\Models\Superuser::class),
+            'model' => App\Models\Superuser::class,
         ],
 
         // 'users' => [

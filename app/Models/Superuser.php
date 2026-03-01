@@ -12,7 +12,7 @@ class Superuser extends Authenticatable
     /** @use HasFactory<\Database\Factories\SuperuserFactory> */
     use HasFactory, Notifiable;
 
-    protected $table = '_superusers';
+    protected $table = 'superusers';
 
     /**
      * The attributes that are mass assignable.

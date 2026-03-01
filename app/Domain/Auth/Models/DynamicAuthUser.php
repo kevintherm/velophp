@@ -16,31 +16,28 @@ class DynamicAuthUser extends Authenticatable implements JWTSubject
     /**
      * Set the table associated with the model dynamically.
      */
-    public function setTable($table)
+    public function setTable($table): DynamicAuthUser|static
     {
         $this->table = $table;
+
         return $this;
     }
 
     /**
      * Get the identifier that will be stored in the subject claim of the JWT.
-     *
-     * @return mixed
      */
-    public function getJWTIdentifier()
+    public function getJWTIdentifier(): mixed
     {
         return $this->getKey();
     }
 
     /**
      * Return a key value array, containing any custom claims to be added to the JWT.
-     *
-     * @return array
      */
-    public function getJWTCustomClaims()
+    public function getJWTCustomClaims(): array
     {
         return [
-            'collection_table' => $this->getTable() // Inject the source table so we know where this user belongs
+            'collection_table' => $this->getTable(), // Inject the source table so we know where this user belongs
         ];
     }
 }

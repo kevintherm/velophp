@@ -6,7 +6,7 @@ use App\Http\Controllers\Auth\RegisterController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
-Route::get('/collections', [CollectionController::class, 'index']);
+Route::resource('collections', CollectionController::class)->except(['create', 'edit']);
 
 Route::middleware(['web'])->group(function () {
     Route::post('/login', [LoginController::class, 'store'])->name('login');

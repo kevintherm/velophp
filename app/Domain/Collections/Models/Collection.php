@@ -3,12 +3,17 @@
 namespace App\Domain\Collections\Models;
 
 use App\Domain\Collections\Enums\CollectionType;
-use App\Domain\SchemaManagement\Application\Commands\RequestSchemaChange;
+use App\Domain\Collections\Observers\CollectionObserver;
+use Illuminate\Database\Eloquent\Attributes\ObservedBy;
+use Illuminate\Database\Eloquent\Concerns\HasUlids;
 use Illuminate\Database\Eloquent\Model;
 
+#[ObservedBy(CollectionObserver::class)]
 class Collection extends Model
 {
-    protected $fillable = ['type', 'name', 'description'];
+    use HasUlids;
+
+    protected $fillable = ['type', 'name', 'description', 'fields', 'api_rules', 'schema_updated_at'];
 
     protected function casts(): array
     {
@@ -16,22 +21,21 @@ class Collection extends Model
             'type' => CollectionType::class,
             'fields' => 'array',
             'api_rules' => 'array',
+            'schema_updated_at' => 'datetime',
         ];
     }
 
-    // Example integration method showing how the Collections Domain interacts with SchemaManagement:
-    public function addField(string $fieldName, string $fieldType): void
+    /**
+     * Get the physical database table name for this collection
+     */
+    public function getPhysicalTableName(): string
     {
-        // 1. Validate domain logic for Collection (e.g. max 50 fields per collection)
-        
-        // 2. Dispatch the requested intent to the SchemaManagement Bounded Context
-        RequestSchemaChange::dispatch(
-            $this->id,      // collection
-            \App\Domain\SchemaManagement\Enums\SchemaChangeType::AddField,
-            [
-                'name' => $fieldName,
-                'type' => $fieldType
-            ]
-        );
+        return self::formatTableName($this->name);
+    }
+
+    public static function formatTableName($collectionName): string
+    {
+        $prefix = config('velo.collection_prefix');
+        return $prefix . $collectionName;
     }
 }
