@@ -341,3 +341,79 @@ it('synchronizes revocation immediately and clears the cache if DB update fails'
         ->assertUnauthorized();
 });
 
+it('invalidates token cache when user record is updated', function () {
+    $collection = createAuthCollection('auth_users_update_test');
+    $user = createAuthRecord($collection, 'update-test@example.test', 'password123');
+
+    $login = postJson("/api/collections/{$collection->name}/auth/login", [
+        'identity' => $user->email,
+        'password' => 'password123',
+    ]);
+
+    $token = $login->json('data.token');
+    $hashedToken = hash('sha256', $token);
+    $cacheKey = "velo:auth:{$hashedToken}";
+
+    // 1. Initial request to ensure the token gets cached.
+    Auth::guard('api')->forgetUser();
+    $this->withToken($token)
+        ->getJson("/api/collections/{$collection->name}/auth/me")
+        ->assertSuccessful()
+        ->assertJsonPath('data.email', 'update-test@example.test');
+
+    // Verify cache hit exists
+    expect(Cache::has($cacheKey))->toBeTrue();
+
+    // 2. Update the user record.
+    $user->update(['email' => 'updated-test@example.test']);
+
+    // 3. The cache must be cleared now.
+    expect(Cache::has($cacheKey))->toBeFalse();
+
+    // 4. A subsequent request should be successful and retrieve updated data.
+    Auth::guard('api')->forgetUser();
+    $this->withToken($token)
+        ->getJson("/api/collections/{$collection->name}/auth/me")
+        ->assertSuccessful()
+        ->assertJsonPath('data.email', 'updated-test@example.test');
+});
+
+it('invalidates token cache and revokes tokens in DB when user record is deleted', function () {
+    $collection = createAuthCollection('auth_users_delete_test');
+    $user = createAuthRecord($collection, 'delete-test@example.test', 'password123');
+
+    $login = postJson("/api/collections/{$collection->name}/auth/login", [
+        'identity' => $user->email,
+        'password' => 'password123',
+    ]);
+
+    $token = $login->json('data.token');
+    $hashedToken = hash('sha256', $token);
+    $cacheKey = "velo:auth:{$hashedToken}";
+
+    // 1. Initial request to ensure the token gets cached.
+    Auth::guard('api')->forgetUser();
+    $this->withToken($token)
+        ->getJson("/api/collections/{$collection->name}/auth/me")
+        ->assertSuccessful();
+
+    // Verify cache hit exists
+    expect(Cache::has($cacheKey))->toBeTrue();
+
+    // 2. Delete the user record.
+    $user->delete();
+
+    // 3. The cache must be cleared now.
+    expect(Cache::has($cacheKey))->toBeFalse();
+
+    // 4. DB token must be revoked.
+    $dbToken = AuthToken::where('token_hash', $hashedToken)->first();
+    expect($dbToken->revoked_at)->not->toBeNull();
+
+    // 5. A subsequent request should be unauthorized.
+    Auth::guard('api')->forgetUser();
+    $this->withToken($token)
+        ->getJson("/api/collections/{$collection->name}/auth/me")
+        ->assertUnauthorized();
+});
+

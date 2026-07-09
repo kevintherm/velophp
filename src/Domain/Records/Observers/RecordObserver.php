@@ -8,6 +8,10 @@ use Veloquent\Core\Domain\Realtime\Events\RealtimeRecordEvent;
 use Veloquent\Core\Domain\Records\Services\FileFieldProcessor;
 use Veloquent\Core\Domain\Realtime\Contracts\RealtimeDispatcher;
 use Veloquent\Core\Domain\Records\Services\RelationIntegrityService;
+use Illuminate\Support\Facades\Cache;
+use Veloquent\Core\Domain\Auth\Models\AuthToken;
+use Veloquent\Core\Domain\Collections\Models\Collection;
+use Veloquent\Core\Domain\Collections\Enums\CollectionType;
 
 class RecordObserver
 {
@@ -34,6 +38,7 @@ class RecordObserver
 
     public function updated(Record $record): void
     {
+        $this->invalidateAuthTokens($record, revoke: false);
         $this->publishEvent('updated', $record);
     }
 
@@ -41,8 +46,33 @@ class RecordObserver
     {
         $this->integrityService->handleRecordDeletion($record->collection, $record->id);
         $this->fileProcessor->cleanupRecordFiles($record);
+        $this->invalidateAuthTokens($record, revoke: true);
 
         $this->publishEvent('deleted', $record);
+    }
+
+    private function invalidateAuthTokens(Record $record, bool $revoke = false): void
+    {
+        $collection = $record->collection;
+        if (! $collection && ($collectionId = $record->getAttribute('collection_id'))) {
+            $collection = Collection::findByIdCached($collectionId);
+        }
+
+        if ($collection && $collection->type === CollectionType::Auth) {
+            $query = AuthToken::query()
+                ->forRecord($collection->id, (string) $record->id)
+                ->active();
+
+            $hashes = $query->pluck('token_hash')->toArray();
+
+            foreach ($hashes as $hash) {
+                Cache::forget("velo:auth:{$hash}");
+            }
+
+            if ($revoke) {
+                $query->update(['revoked_at' => now()]);
+            }
+        }
     }
 
     public function restored(Record $record): void
