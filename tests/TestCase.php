@@ -57,6 +57,12 @@ abstract class TestCase extends OrchestraTestCase
 
     protected function getEnvironmentSetUp($app)
     {
+        $storagePath = realpath(__DIR__ . '/../') . '/storage';
+        $app->useStoragePath($storagePath);
+        if (!is_dir($storagePath . '/logs')) {
+            @mkdir($storagePath . '/logs', 0777, true);
+        }
+
         $app['config']->set('app.key', 'base64:Xgs89rk/rM+8H/5X5A9U6fR/U0+5r/I/o/I/I/I/I/I=');
         $app['config']->set('app.url', 'http://localhost');
         $app['config']->set('database.default', 'testbench');

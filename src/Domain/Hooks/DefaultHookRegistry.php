@@ -17,6 +17,7 @@ class DefaultHookRegistry implements HookRegistry
         'auth.password_reset' => ['password_resetting' => 'auth.password_resetting', 'password_reset' => 'auth.password_reset'],
         'auth.email_verify' => ['email_verifying' => 'auth.email_verifying', 'email_verified' => 'auth.email_verified'],
         'auth.email_change' => ['email_changing' => 'auth.email_changing', 'email_changed' => 'auth.email_changed'],
+        'ai.generate' => ['generating' => 'ai.generating', 'generated' => 'ai.generated'],
     ];
 
     /**

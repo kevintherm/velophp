@@ -17,10 +17,7 @@
 /public/storage
 /public/vendor/
 /public/build/
-/storage/*.key
-/storage/pail
-/storage/realtime
-/storage/tenants/*
+/storage/
 /vendor
 Homestead.json
 Homestead.yaml

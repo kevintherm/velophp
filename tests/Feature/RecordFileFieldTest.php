@@ -73,6 +73,11 @@ function appendQueryToken(string $url, string $token): string
     return "{$url}{$separator}token=".rawurlencode($token);
 }
 
+function fakeStorage(): void
+{
+    Storage::fake(config('filesystems.default', 'local'));
+}
+
 it('accepts richtext field values as plain strings', function () {
     $collection = createRecordFileCollection([
         ['name' => 'title', 'type' => CollectionFieldType::Text->value, 'nullable' => false],
@@ -88,7 +93,7 @@ it('accepts richtext field values as plain strings', function () {
 });
 
 it('accepts boolean multipart values when a file field is present', function () {
-    Storage::fake(config('filesystems.default', 'local'));
+    fakeStorage();
 
     $collection = createRecordFileCollection([
         ['name' => 'title', 'type' => CollectionFieldType::Text->value, 'nullable' => false],
@@ -157,7 +162,7 @@ it('drops file default and persists protected configuration in collection metada
 });
 
 it('stores single file fields as json arrays and returns normalized single object', function () {
-    Storage::fake(config('filesystems.default', 'local'));
+    fakeStorage();
 
     $collection = createRecordFileCollection([
         ['name' => 'title', 'type' => CollectionFieldType::Text->value, 'nullable' => false],
@@ -203,7 +208,7 @@ it('stores single file fields as json arrays and returns normalized single objec
 });
 
 it('validates file mime and max size constraints', function () {
-    Storage::fake(config('filesystems.default', 'local'));
+    fakeStorage();
 
     $collection = createRecordFileCollection([
         ['name' => 'title', 'type' => CollectionFieldType::Text->value, 'nullable' => false],
@@ -234,7 +239,7 @@ it('validates file mime and max size constraints', function () {
 });
 
 it('validates min and max file count constraints for multiple file fields', function () {
-    Storage::fake(config('filesystems.default', 'local'));
+    fakeStorage();
 
     $collection = createRecordFileCollection([
         ['name' => 'title', 'type' => CollectionFieldType::Text->value, 'nullable' => false],
@@ -280,7 +285,7 @@ it('validates min and max file count constraints for multiple file fields', func
 });
 
 it('applies append and remove operations for multiple file fields', function () {
-    Storage::fake(config('filesystems.default', 'local'));
+    fakeStorage();
 
     $collection = createRecordFileCollection([
         ['name' => 'title', 'type' => CollectionFieldType::Text->value, 'nullable' => false],
@@ -337,7 +342,7 @@ it('applies append and remove operations for multiple file fields', function () 
 });
 
 it('replaces single file fields and removes the previous file', function () {
-    Storage::fake(config('filesystems.default', 'local'));
+    fakeStorage();
 
     $collection = createRecordFileCollection([
         ['name' => 'title', 'type' => CollectionFieldType::Text->value, 'nullable' => false],
@@ -383,7 +388,7 @@ it('replaces single file fields and removes the previous file', function () {
 });
 
 it('deletes referenced files when deleting a record', function () {
-    Storage::fake(config('filesystems.default', 'local'));
+    fakeStorage();
 
     $collection = createRecordFileCollection([
         ['name' => 'title', 'type' => CollectionFieldType::Text->value, 'nullable' => false],
@@ -418,7 +423,7 @@ it('deletes referenced files when deleting a record', function () {
 });
 
 it('requires a token to view protected files and allows bearer token access', function () {
-    Storage::fake(config('filesystems.default', 'local'));
+    fakeStorage();
 
     $authCollection = createRecordFileAuthCollection();
     $token = issueRecordFileAuthToken($authCollection);
@@ -472,7 +477,7 @@ it('requires a token to view protected files and allows bearer token access', fu
 });
 
 it('enforces view rules when opening protected files', function () {
-    Storage::fake(config('filesystems.default', 'local'));
+    fakeStorage();
 
     $authCollection = createRecordFileAuthCollection();
     $token = issueRecordFileAuthToken($authCollection);
@@ -516,7 +521,7 @@ it('enforces view rules when opening protected files', function () {
 });
 
 it('keeps unprotected file URLs as direct storage URLs', function () {
-    Storage::fake(config('filesystems.default', 'local'));
+    fakeStorage();
 
     $collection = createRecordFileCollection([
         ['name' => 'title', 'type' => CollectionFieldType::Text->value, 'nullable' => false],
