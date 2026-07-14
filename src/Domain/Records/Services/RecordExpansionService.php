@@ -103,7 +103,7 @@ class RecordExpansionService
             }
 
             $resolvedByField[$fieldName] = $query
-                ->whereIn('id', $relationIds)
+                ->whereIn($query->getModel()->getQualifiedKeyName(), $relationIds)
                 ->get()
                 ->mapWithKeys(function (Record $targetRecord): array {
                     return [(string) $targetRecord->getAttribute('id') => $targetRecord];

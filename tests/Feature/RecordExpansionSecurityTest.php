@@ -224,3 +224,64 @@ it('verifies that each collection rules applies to expansion filtering', functio
         ->assertJsonPath('data.2.expand.category.id', $activeCategory->id)
         ->assertJsonPath('data.2.expand.tag', null);
 });
+
+it('avoids ambiguous column reference when expanding relations with view rules containing joins', function () {
+    // 1. Create a users collection
+    $usersCollection = Collection::create([
+        'name' => 'velo_users',
+        'type' => CollectionType::Base,
+        'fields' => [
+            ['id' => 'coach_field_id', 'name' => 'coach', 'type' => CollectionFieldType::Relation->value, 'target_collection_id' => 'USER_ID_PLACEHOLDER', 'nullable' => true],
+        ],
+        'api_rules' => ['view' => '', 'list' => ''],
+    ]);
+
+    // 2. Create a days collection with a view rule referencing user's coach (triggers a join on users)
+    $daysCollection = Collection::create([
+        'name' => 'velo_days',
+        'type' => CollectionType::Base,
+        'fields' => [
+            ['id' => 'user_field_id', 'name' => 'user', 'type' => CollectionFieldType::Relation->value, 'target_collection_id' => $usersCollection->id, 'nullable' => true],
+        ],
+        'api_rules' => [
+            'view' => 'user.coach != ""',
+            'list' => 'user.coach != ""',
+        ],
+    ]);
+
+    // Update the placeholder target_collection_id for coach field
+    $usersCollection->update([
+        'fields' => collect($usersCollection->fields)->map(function ($f) use ($usersCollection) {
+            if ($f['name'] === 'coach') {
+                $f['target_collection_id'] = $usersCollection->id;
+            }
+            return $f;
+        })->all(),
+    ]);
+
+    // 3. Create a workouts collection containing day (relation)
+    $workoutsCollection = Collection::create([
+        'name' => 'velo_workouts',
+        'type' => CollectionType::Base,
+        'fields' => [
+            ['name' => 'day', 'type' => CollectionFieldType::Relation->value, 'target_collection_id' => $daysCollection->id],
+        ],
+        'api_rules' => ['view' => '', 'list' => ''],
+    ]);
+
+    // Create a coach/user record
+    $coach = Record::of($usersCollection)->create(['coach' => null]);
+    $user = Record::of($usersCollection)->create(['coach' => $coach->id]);
+    
+    // Create a day record
+    $day = Record::of($daysCollection)->create(['user' => $user->id]);
+
+    // Create a workout record
+    $workout = Record::of($workoutsCollection)->create(['day' => $day->id]);
+
+    // Request workouts with expand=day
+    getJson("/api/collections/{$workoutsCollection->id}/records?expand=day")
+        ->assertSuccessful()
+        ->assertJsonPath('data.0.expand.day.id', $day->id);
+});
+

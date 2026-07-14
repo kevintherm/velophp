@@ -23,8 +23,10 @@ class RecordBuilder extends Builder
         $systemSorts = ['created_at', 'updated_at', 'id'];
         $allowed = array_merge(Arr::pluck($collection->fields, 'name'), $systemSorts);
 
+        $tableName = $collection->getPhysicalTableName();
+
         if (empty($sortParam)) {
-            return $this->orderByDesc('created_at');
+            return $this->orderByDesc($tableName.'.created_at');
         }
 
         foreach (explode(',', $sortParam) as $sort) {
@@ -32,7 +34,7 @@ class RecordBuilder extends Builder
             $column = ltrim($sort, '-');
 
             if (in_array($column, $allowed)) {
-                $this->orderBy($column, $direction);
+                $this->orderBy($tableName.'.'.$column, $direction);
             }
         }
 
