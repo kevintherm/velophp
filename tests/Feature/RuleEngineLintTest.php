@@ -64,3 +64,9 @@ it('accepts bracket-notation system variable and complex rule in lint', function
 )';
     expect(fn () => $engine->lint($rule))->not->toThrow(InvalidRuleExpressionException::class);
 });
+
+it('accepts pocketbase contains ~ and !~ operators in lint', function () {
+    $engine = RuleEngine::make(['exercise']);
+    expect(fn () => $engine->lint('exercise ~ "cable"'))->not->toThrow(InvalidRuleExpressionException::class);
+    expect(fn () => $engine->lint('exercise !~ "cable"'))->not->toThrow(InvalidRuleExpressionException::class);
+});

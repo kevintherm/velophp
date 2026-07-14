@@ -41,6 +41,17 @@ class VeloquentParser extends Parser
             return;
         }
 
+        // Allow ~ and !~
+        if ($operator === '~' || $operator === '!~') {
+            if (!is_string($value) && !$value instanceof IdentifierNode) {
+                throw new ParserException(
+                    sprintf('Operator %s requires a string value, received %s. At position %d.', $operator, gettype($value), (int) $token['position'])
+                );
+            }
+
+            return;
+        }
+
         parent::assertOperatorValueCompatibility($operator, $value, $token);
     }
 }

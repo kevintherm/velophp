@@ -90,6 +90,14 @@ it('evaluates like / not like', function () {
     expect($engine->evaluate('name like "%nobody%"', ['name' => 'Mr. John Smith']))->toBeFalse();
 });
 
+it('evaluates pocketbase contains ~ and !~', function () {
+    $engine = RuleEngine::make();
+    expect($engine->evaluate('name ~ "John"', ['name' => 'Mr. John Smith']))->toBeTrue();
+    expect($engine->evaluate('name !~ "John"', ['name' => 'Mr. John Smith']))->toBeFalse();
+    expect($engine->evaluate('name ~ "nobody"', ['name' => 'Mr. John Smith']))->toBeFalse();
+    expect($engine->evaluate('name !~ "nobody"', ['name' => 'Mr. John Smith']))->toBeTrue();
+});
+
 it('evaluates in / not in', function () {
     $engine = RuleEngine::make();
     expect($engine->evaluate('role in ("admin","editor")', ['role' => 'admin']))->toBeTrue();

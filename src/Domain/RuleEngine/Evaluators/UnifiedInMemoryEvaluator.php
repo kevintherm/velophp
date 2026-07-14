@@ -52,6 +52,13 @@ class UnifiedInMemoryEvaluator extends InMemoryEvaluator
             $rightValue = $val;
         }
 
+        if ($op === '~' || $op === '!~') {
+            $op = $op === '~' ? 'LIKE' : 'NOT LIKE';
+            if (is_string($rightValue)) {
+                $rightValue = '%' . $rightValue . '%';
+            }
+        }
+
         // Cross-collection
         if ($leftIsCollection) {
             return $this->evaluateCrossCollectionExists($this->collectionPath($field), $op, $rightValue);
@@ -231,12 +238,19 @@ class UnifiedInMemoryEvaluator extends InMemoryEvaluator
 
         if ($node instanceof ComparisonNode) {
             $field = $node->field;
-            $op    = $node->operator;
+            $op    = strtoupper($node->operator);
             $val   = $node->value instanceof IdentifierNode
                 ? ($this->isSysvar($node->value->name)
                     ? $this->sysvarValue($node->value->name)
                     : data_get($this->context, $node->value->name))
                 : $node->value;
+
+            if ($op === '~' || $op === '!~') {
+                $op = $op === '~' ? 'LIKE' : 'NOT LIKE';
+                if (is_string($val)) {
+                    $val = '%' . $val . '%';
+                }
+            }
 
             $q->where($field, $op, $val);
 

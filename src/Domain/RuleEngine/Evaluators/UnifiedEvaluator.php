@@ -178,6 +178,13 @@ class UnifiedEvaluator implements EvaluatorInterface, VisitorInterface
         $right = $this->resolveOperand($node->value);
         $operator = strtoupper($node->operator);
 
+        if ($operator === '~' || $operator === '!~') {
+            $operator = $operator === '~' ? 'LIKE' : 'NOT LIKE';
+            if (is_string($right->value)) {
+                $right->value = '%' . $right->value . '%';
+            }
+        }
+
         // Cross-collection lookups
         if ($left->isCollection) {
             $collectionPath = str_replace('@collection.', '', $node->field);
@@ -514,6 +521,8 @@ class UnifiedEvaluator implements EvaluatorInterface, VisitorInterface
             '<=' => '>',
             'LIKE' => 'NOT LIKE',
             'NOT LIKE' => 'LIKE',
+            '~' => '!~',
+            '!~' => '~',
             'IN' => 'NOT IN',
             'NOT IN' => 'IN',
             'CONTAINS' => 'NOT CONTAINS',

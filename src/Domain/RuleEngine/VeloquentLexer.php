@@ -93,6 +93,20 @@ class VeloquentLexer extends Lexer
             return $this->token(Lexer::T_OPERATOR, 'HASKEY', $position);
         }
 
+        // !~ → NOT LIKE operator
+        if ($char === '!' && isset($input[$cursor + 1]) && $input[$cursor + 1] === '~') {
+            $cursor += 2;
+
+            return $this->token(Lexer::T_OPERATOR, '!~', $position);
+        }
+
+        // ~ → LIKE operator
+        if ($char === '~') {
+            $cursor++;
+
+            return $this->token(Lexer::T_OPERATOR, '~', $position);
+        }
+
         // @sysvar.path → single IDENTIFIER token
         if ($char === '@') {
             $cursor++; // consume @

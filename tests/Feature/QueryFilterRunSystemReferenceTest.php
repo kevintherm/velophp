@@ -152,3 +152,27 @@ it('compiles grouped sysvar null comparison using bound SQL in logical expressio
         ->and($query->getBindings())->toContain(1)
         ->and($query->getBindings())->toContain(21);
 });
+
+it('compiles pocketbase contains ~ and !~ operators into LIKE and NOT LIKE with wildcards', function () {
+    $query = Collection::query();
+
+    QueryFilter::for($query, ['exercise'])->run('exercise ~ "cable"');
+
+    $sql = strtolower($query->toSql());
+
+    expect($sql)->toContain('exercise')
+        ->and($sql)->toContain('like ?')
+        ->and($query->getBindings())->toBe(['%cable%']);
+});
+
+it('compiles pocketbase contains !~ operator into NOT LIKE with wildcards', function () {
+    $query = Collection::query();
+
+    QueryFilter::for($query, ['exercise'])->run('exercise !~ "cable"');
+
+    $sql = strtolower($query->toSql());
+
+    expect($sql)->toContain('exercise')
+        ->and($sql)->toContain('not like ?')
+        ->and($query->getBindings())->toBe(['%cable%']);
+});
